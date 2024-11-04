@@ -1,0 +1,9 @@
+{
+    "fa_path"     : "genomes/GCF_000001735.4_TAIR10.1_genomic.fna.gz",
+    "gff_path"    : "genomes/GCF_000001735.4_TAIR10.1_genomic.gff.gz",
+    "output_dir"  : "../gpn/output",
+    "test_seq"    : "NC_003076.8",
+    "test_start"  : 0,
+    "test_end"    : 0,
+    "window_size" : 100
+}

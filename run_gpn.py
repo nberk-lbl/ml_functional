@@ -7,26 +7,26 @@ import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 import torch
 from transformers import AutoModel, AutoModelForMaskedLM, AutoTokenizer
+import json
 
 from Bio import SeqIO
 import gzip
+import sys
 import os
 os.environ['HF_HOME'] = '/pscratch/sd/n/nberk/gpn/gpn/tmp/'
+run_cfg = json.loads(open(sys.argv[1], 'r').read())
 
 print("loading model")
 model_path = "songlab/gpn-brassicales"
 model = AutoModelForMaskedLM.from_pretrained(model_path)
 
-data_path = "../gpn/Phytozome"
-output_dir = "../gpn/output"
-
 print("loading fasta")
 sequences = {}
-with gzip.open(f'{data_path}/PhytozomeV13/Ptrichocarpa/v4.1/assembly/Ptrichocarpa_533_v4.0.fa.gz','rt') as genome_fa:
+with gzip.open(f'{run_cfg["fa_path"]}','rt') as genome_fa:
     for record in SeqIO.parse(genome_fa, "fasta"):
         sequences[record.id] = record.seq
 
-test_name = 'Chr19'
+test_name = run_cfg['test_seq']
 print(f"testing with {test_name}")
 
 plt.figure(figsize=(10, 6))
@@ -93,12 +93,13 @@ while (i * chunk_size < len(sequences[test_name])):
     """
 
     # Calculate the mean for each 100-row window
-    window_size = 100
+    window_size = run_cfg['window_size']
     embedding_df = pd.DataFrame(StandardScaler().fit_transform(embedding[0].numpy()))
     averaged_embeddings = embedding_df.groupby(embedding_df.index // window_size).mean()
     final_averaged_embeddings = pd.concat([final_averaged_embeddings, averaged_embeddings], ignore_index=True)
 
     i+=1
 
-averaged_embeddings.to_csv('averaged_embeddings.tsv', sep='\t', index=False)
+pfx = sys.argv[1][0:-4]
+averaged_embeddings.to_csv(f'{run_cfg["output_dir"]}/{pfx}_avg_embeddings.tsv', sep='\t', index=False)
     

@@ -1,0 +1,9 @@
+{
+    "fa_path"     : "../gpn/Phytozome/PhytozomeV13/Ptrichocarpa/v4.1/assembly/Ptrichocarpa_533_v4.0.fa.gz",
+    "gff_path"    : "../gpn/Phytozome/PhytozomeV13/Ptrichocarpa/v4.1/annotation/Ptrichocarpa_533_v4.1.gene_exons.gff3.gz",
+    "output_dir"  : "../gpn/output",
+    "test_seq"    : "Chr19",
+    "test_start"  : 0,
+    "test_end"    : 0,
+    "window_size" : 100
+}

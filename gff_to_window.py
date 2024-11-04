@@ -1,10 +1,15 @@
 import sys
 import gzip
+import json
 
-window_size = int(sys.argv[1])
-infile = "../gpn/Phytozome/PhytozomeV13/Ptrichocarpa/v4.1/annotation/Ptrichocarpa_533_v4.1.gene_exons.gff3.gz" # sys.argv[2]
-target_chrom = "Chr19"
-approx_chrom_len = int(16e6 / window_size)
+run_cfg = json.loads(open(sys.argv[1], 'r').read())
+window_size = run_cfg['window_size']
+
+infile =  run_cfg['gff_path']
+outfile = sys.argv[1][0:-4] + "_gff_bins.tsv"
+target_chrom = run_cfg["test_seq"]
+
+approx_chrom_len = int(40e6 / window_size)
 chrom_bins = {}
 
 with gzip.open(infile, 'rb') as gff:
@@ -31,18 +36,20 @@ with gzip.open(infile, 'rb') as gff:
                     print(fields)
                 chrom_bins[label][strand][bin_num] += 1
 
-header = []
-for label in chrom_bins.keys():
-    for strand in chrom_bins[label].keys():
-        header.append(f"{label}({strand})")
-print("\t".join(header))
-
-for i in range(approx_chrom_len):
-    fields = []
+with open(outfile, 'w') as out_tsv:
+    header = []
     for label in chrom_bins.keys():
         for strand in chrom_bins[label].keys():
-            fields.append(f"{chrom_bins[label][strand][i]}")
-    print("\t".join(fields))
+            header.append(f"{label}_{strand}")
+    print("\t".join(header), file=out_tsv)
+
+
+    for i in range(approx_chrom_len):
+        fields = []
+        for label in chrom_bins.keys():
+            for strand in chrom_bins[label].keys():
+                fields.append(f"{chrom_bins[label][strand][i]}")
+        print("\t".join(fields), file=out_tsv)
  
 
             
