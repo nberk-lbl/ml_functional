@@ -1,0 +1,11 @@
+{
+    "fa_path"     : "genomes/Arabidopsis_thaliana.TAIR10.dna.chromosome.4.fa.gz",
+    "gff_path"    : "genomes/Arabidopsis_thaliana.TAIR10.60.chromosome.4.gff3.gz",
+    "rep_bed"    :  "genomes/AT_repeates.bed",
+    "output_dir"  : "data",
+    "test_seq"    : "4",
+    "test_start"  : 0,
+    "test_end"    : 0,
+    "window_size" : 100,
+    "out_pfx"     : "TAIR10"
+}

@@ -75,23 +75,6 @@ while (i * chunk_size < len(sequences[test_name])):
         embedding = model(input_ids=input_ids).last_hidden_state
     print(embedding.shape)
 
-
-    """
-    # This block is for making the exon/embedding plot
-
-    print("creating visualization")
-    embedding_df = pd.DataFrame(StandardScaler().fit_transform(embedding[0].numpy()))
-    embedding_df.index.name = "Position"
-    embedding_df.columns.name = "Embedding dimension"
-
-    print("embedding df")
-    print(embedding_df)
-
-    plt.figure(figsize=(10, 6))
-    sns.heatmap(embedding_df.T, center=0, vmin=-3, vmax=3, cmap="coolwarm", square=True, xticklabels=100, yticklabels=100)
-    plt.savefig(f'{output_dir}/{test_name}.png')
-    """
-
     # Calculate the mean for each 100-row window
     window_size = run_cfg['window_size']
     embedding_df = pd.DataFrame(StandardScaler().fit_transform(embedding[0].numpy()))

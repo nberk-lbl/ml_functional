@@ -8,8 +8,9 @@ window_size = run_cfg['window_size']
 infile =  run_cfg['gff_path']
 outfile = sys.argv[1][0:-4] + "_gff_bins.tsv"
 target_chrom = run_cfg["test_seq"]
+max_end = 0
 
-approx_chrom_len = int(40e6 / window_size)
+approx_chrom_len = int(20e6 / window_size)
 chrom_bins = {}
 
 with gzip.open(infile, 'rb') as gff:
@@ -29,7 +30,8 @@ with gzip.open(infile, 'rb') as gff:
             end = int(fields[4])
             strand = fields[6]
 
-            
+            if end > max_end:
+                max_end = end
             for nt in range(start, end):
                 bin_num = int(nt / window_size)
                 if bin_num >= len(chrom_bins[label][strand]):
@@ -44,7 +46,7 @@ with open(outfile, 'w') as out_tsv:
     print("\t".join(header), file=out_tsv)
 
 
-    for i in range(approx_chrom_len):
+    for i in range(max_end / window_size):
         fields = []
         for label in chrom_bins.keys():
             for strand in chrom_bins[label].keys():
