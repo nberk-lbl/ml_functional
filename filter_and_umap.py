@@ -17,8 +17,6 @@ import sys
 import os
 os.environ['HF_HOME'] = '/pscratch/sd/n/nberk/gpn/gpn/tmp/'
 run_cfg = json.loads(open(sys.argv[1], 'r').read())
-seq_len = 18585056
-
 
 def rc(seq):
     t = {
@@ -51,10 +49,11 @@ repeat_bins = set()
 with open(run_cfg["rep_bed"]) as repeat_bed:
     for b in repeat_bed:
         fields = b.rstrip().split()
-        start, end = int(fields[1]), int(fields[2])
-        for i in range(start, end):
-            r = int(i/run_cfg['window_size'])
-            repeat_bins.add(r)
+        if fields[0] == run_cfg['test_seq']:
+            start, end = int(fields[1]), int(fields[2])
+            for i in range(start, end):
+                r = int(i/run_cfg['window_size'])
+                repeat_bins.add(r)
 
 print("building region map")
 nt_region_map = {}
@@ -63,13 +62,14 @@ with gzip.open(run_cfg["gff_path"], "rb") as gff:
         g = f.decode('utf-8')
         if not(g[0] == "#"): # skip header
             fields = g.rstrip().split()
-            start, end = int(fields[3]), int(fields[4])
-            region = fields[2]
-            if (region not in ('chromosome')):
-                if not region in nt_region_map:
-                    nt_region_map[region] = [0] * 18585056
-                for i in range(start, end):
-                    nt_region_map[region][i] = 1
+            if (fields[0] == run_cfg['test_seq']):
+                start, end = int(fields[3]), int(fields[4])
+                region = fields[2]
+                if (region not in ('chromosome')):
+                    if not region in nt_region_map:
+                        nt_region_map[region] = [0] * 18585056
+                    for i in range(start, end):
+                        nt_region_map[region][i] = 1
 
 print("getting annotation bins")
 region_bins = {}
@@ -152,4 +152,4 @@ with open(f"{prefix}_regions.csv", "w") as regions_file:
             strand_avg_embeddings = (averaged_embeddings + rc_averaged_embeddings) / 2
             final_averaged_embeddings = pd.concat([final_averaged_embeddings, strand_avg_embeddings], ignore_index=True)
 
-averaged_embeddings.to_csv(f'{run_cfg["output_dir"]}/{prefix}_avg_embeddings.tsv', sep='\t', index=False)
+final_averaged_embeddings.to_csv(f'{run_cfg["output_dir"]}/{prefix}_avg_embeddings.tsv', sep='\t', index=False)
