@@ -1,10 +1,26 @@
 # Trying to replicate the umap plot with a poplar genome
 
-embeddings = read.csv("GCF_000001735.4_TAIR10.1._avg_embeddings.tsv", sep ="\t", head=F)
-embeddings.umap = umap(embeddings)
+embeddings = ''
+embeddings_umap = ''
 
+find_bounds <- function(x) {
+  # Sort the values to handle outliers
+  x <- sort(x)
+  
+  # Define a cutoff for extreme outliers based on quantiles
+  lower_quantile <- quantile(x, 0.05) # Lower 5th percentile
+  upper_quantile <- quantile(x, 0.95) # Upper 95th percentile
 
-plot(embeddings.umap $layout[,1], embeddings.umap $layout[,2], cex=.4, pch=19, xlim=c(-10,10), ylim=c(-10,10))
+  # Calculate the interquartile range for the main bulk of the data
+  iqr <- IQR(x)
+  
+  # Define the main bounds by trimming extreme values based on IQR
+  lower_bound <- max(min(x), lower_quantile - 1.5 * iqr)
+  upper_bound <- min(max(x), upper_quantile + 1.5 * iqr)
+  
+  return(c(lower_bound, upper_bound))
+}
 
-
-
+plot(embeddings_umap $layout[,1], embeddings_umap $layout[,2], cex=.4, pch=19, 
+    xlim=find_bounds(embeddings_umap $layout[,1]), 
+    ylim=find_bounds(embeddings_umap $layout[,2]))

@@ -13,6 +13,29 @@ from Bio import SeqIO
 import gzip
 import sys
 import os
+
+
+def rc(seq):
+
+    comp = {
+        'A' : 'T',
+        'T' : 'A',
+        'G' : 'C',
+        'C' : 'G'
+    }
+    rc = ''
+
+    rev = seq[::-1]
+    for n in rev:
+        c = n
+        if n in comp:
+            c = comp[n]
+        rc += c
+
+    return rc
+
+
+
 os.environ['HF_HOME'] = '/pscratch/sd/n/nberk/gpn/gpn/tmp/'
 run_cfg = json.loads(open(sys.argv[1], 'r').read())
 
@@ -44,9 +67,12 @@ window_size = run_cfg['window_size']
 chunk_size = window_size * 1000
 pfx = run_cfg['out_pfx']
 
+
 for rec in sequences.keys():
+    
     seq = sequences[rec]
     final_averaged_embeddings = pd.DataFrame()
+    
     for i in range(int(len(seq) / chunk_size) + 1):
         a = i * chunk_size
         b = min((i+1) * chunk_size, len(seq))
@@ -60,9 +86,25 @@ for rec in sequences.keys():
             embedding = model(input_ids=input_ids).last_hidden_state
         print(embedding.shape)
 
+        rc_chunk = rc(chunk)
+        rc_input_ids = tokenizer(str(chunk), return_tensors="pt", return_attention_mask=False, return_token_type_ids=False)["input_ids"]
+        with torch.no_grad():
+            rc_embedding = model(input_ids=input_ids).last_hidden_state
+
         embedding_df = pd.DataFrame(StandardScaler().fit_transform(embedding[0].numpy()))
-        averaged_embeddings = embedding_df.groupby(embedding_df.index // window_size).mean()
+        rc_embeddings_df = pd.DataFrame(StandardScaler().fit_transform(rc_embedding[0].numpy()))
+
+        # Reverse the order of rc_embeddings so they align with the forward embeddings
+        rc_embeddings_df_reversed = rc_embeddings_df.iloc[::-1].reset_index(drop=True)
+
+        # Average the embeddings from forward and reverse complement
+        combined_embeddings = (embedding_df + rc_embeddings_df_reversed) / 2
+
+        # embeddings across the window`
+        averaged_embeddings = combined_embeddings.groupby(combined_embeddings.index // window_size).mean()
+
         final_averaged_embeddings = pd.concat([final_averaged_embeddings, averaged_embeddings], ignore_index=True)
 
-    final_averaged_embeddings.to_csv(f'{run_cfg["output_dir"]}/{pfx}_{rec}_avg_embeddings.tsv', sep='\t', index=False)
-    
+    final_averaged_embeddings.to_csv(f'{run_cfg["output_dir"]}/{pfx}_{rec}_all_avg_embeddings.tsv', sep='\t', index=False)
+
+

@@ -1,0 +1,15 @@
+{
+    "fa_path"     : "genomes/Arabidopsis_thaliana.TAIR10.dna.chromosome.4.fa.gz",
+    "gff_path"    : "genomes/Arabidopsis_thaliana.TAIR10.60.chromosome.4.gff3.gz",
+    "intron_gff"  : "genomes/Arabidopsis_thaliana.TAIR10.60.chromosome.4.intron.gff3",
+    "gff_tags"    : ["CDS", "three_prime_UTR", "five_prime_UTR", "ncRNA"],
+    "repeat_bed"  :  "genomes/AT_repeats.bed",
+    "output_dir"  : "data",
+    "test_seq"    : "4",
+    "test_start"  : 0,
+    "test_end"    : 0,
+    "window_size" : 100,
+    "threshold"   : 0.8,
+    "out_pfx"     : "TAIR10.with_rc",
+    "chrom_size"  : {"4" : 18585056}
+}
