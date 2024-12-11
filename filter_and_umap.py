@@ -8,15 +8,26 @@ from sklearn.preprocessing import StandardScaler
 import torch
 from transformers import AutoModel, AutoModelForMaskedLM, AutoTokenizer
 
-
 import json
-
 from Bio import SeqIO
 import gzip
 import sys
 import os
 os.environ['HF_HOME'] = '/pscratch/sd/n/nberk/gpn/gpn/tmp/'
 run_cfg = json.loads(open(sys.argv[1], 'r').read())
+
+"""
+This script runs GPN to create embeddings. Embedding are visualized downstream in 100nt windows
+
+- load the fasta into memory
+- read a bed file of repeates and track the repeat windows
+- 
+
+
+"""
+
+
+
 
 def rc(seq):
     t = {
